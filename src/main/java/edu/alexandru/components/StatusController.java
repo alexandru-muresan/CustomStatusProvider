@@ -1,7 +1,10 @@
 package edu.alexandru.components;
 
-import com.sun.deploy.net.HttpResponse;
-import org.springframework.http.HttpRequest;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,18 +17,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class StatusController {
 
-    @RequestMapping(value = "/getStatus/{reqestStatus}", method = RequestMethod.GET, produces = "application/json")
-    public HttpStatus customStatus(@PathVariable String reqestStatus, HttpRequest request, HttpResponse response) {
+    @RequestMapping(value = "/getStatus/{reqestedStatus}", method = {RequestMethod.GET, RequestMethod.POST}, produces = "application/json")
+    public void customStatus(@PathVariable String reqestedStatus, HttpServletResponse response) throws IOException {
         try {
-            int returnStatus = Integer.parseInt(reqestStatus);
-            return HttpStatus.valueOf(returnStatus);
+            int returnStatus = Integer.parseInt(reqestedStatus);
+
+            response.setStatus(returnStatus);
         } catch (NumberFormatException e) {
-            return HttpStatus.BAD_REQUEST;
+            response.sendError(400, "Bad request. Status param must be integer.");
         }
     }
 
-    @RequestMapping(value = "/hello", method = RequestMethod.GET, produces = "application/json")
-    public String hello() {
+    @RequestMapping(value = "/hello", method = {RequestMethod.GET, RequestMethod.POST}, produces = "application/json")
+    public String hello(HttpServletResponse response) {
+        response.setStatus(HttpStatus.OK.value());
         return "hello";
     }
 }
